@@ -33,7 +33,7 @@ def get_spell_details(spell: str) -> dict:
         spell (str): Name of the spell formatted for the GET request.
 
     Returns:
-        formatted_details (dict): Dictionary representation of all spell details.
+        msg (str): Formatted string containing all spell details.
 
     Raises:
         RequestExecutionError
@@ -56,7 +56,19 @@ def get_spell_details(spell: str) -> dict:
     # Cleaning up field names for a pretty print
     formatted_details = {field.replace("_", " ").capitalize(): details[field] for field in details}
     LOGGER.info(formatted_details)
-    return formatted_details
+    msg = []
+    # Populating embedded message with all returned fields
+    for field in formatted_details:
+        # Setting base value for empty fields
+        if not formatted_details[field]:
+            formatted_details[field] = "None"
+        LOGGER.info("field --- %s", field)
+        LOGGER.info("value --- %s", formatted_details[field])
+        formatted_details[field] = str(formatted_details[field]).strip('\n')
+        msg.append(f"**{field}**\n{formatted_details[field]}")
+    msg.append("...anything look weird here? Let me know!")
+    msg = '\n'.join(msg)
+    return msg
 
 
 def get_monster_details(monster: str) -> dict:

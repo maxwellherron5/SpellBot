@@ -50,19 +50,7 @@ async def on_message(ctx, spell: str):
     LOGGER.info("New message: %s", spell)
     try:
         spell_details = get_spell_details(spell)
-        # Formatting the output details into an embedded message
-        msg = discord.Embed(title=f"{spell_details['Name']}", description="Here's all you need to know! (and probably more)")
-
-        # Populating embedded message with all returned fields
-        for field in spell_details:
-            # Setting base value for empty fields
-            if not spell_details[field]:
-                spell_details[field] = "None"
-            LOGGER.info("field --- %s", field)
-            LOGGER.info("value --- %s", spell_details[field])
-            msg.add_field(name=f"**{field}**", value=f"{spell_details[field]}", inline=False)
-        msg.set_footer(text="...anything look weird here? Let me know!")
-        await ctx.channel.send(embed=msg)
+        await ctx.channel.send(spell_details)
 
     except RequestExecutionError as exc:
         msg = exc.message
