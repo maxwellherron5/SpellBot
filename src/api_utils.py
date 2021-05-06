@@ -12,6 +12,8 @@ import json
 import urllib3
 from dotenv import load_dotenv
 
+from responses.spell import Spell
+
 # Creating access to environment variables
 load_dotenv()
 DND_URL = os.getenv('DND_URL')
@@ -50,8 +52,12 @@ def get_spell_details(spell: str) -> dict:
         raise RequestExecutionError(error)
 
     # Trimming unneeded details from result
-    junk_keys = ["slug", "document__slug", "document__title", "document__license_url"]
-    [details.pop(key) for key in junk_keys]
+    junk_keys = ["slug", "page", "document__slug", "document__title", "document__license_url"] +
+        [field for field in details if not field]
+    for key in junk_keys:
+        details.pop(key)
+    spell = Spell(**details)
+    LOGGER.info(str(spell))
 
     # Cleaning up field names for a pretty print
     formatted_details = {field.replace("_", " ").capitalize(): details[field] for field in details}
