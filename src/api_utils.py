@@ -52,29 +52,15 @@ def get_spell_details(spell: str) -> dict:
         raise RequestExecutionError(error)
 
     # Trimming unneeded details from result
-    junk_keys = ["slug", "page", "document__slug", "document__title", "document__license_url"] +
-        [field for field in details if not field]
+    junk_keys = ["slug", "page", "document__slug", "document__title", "document__license_url"] + \
+        [field for field in details if not details[field]]
     for key in junk_keys:
         details.pop(key)
-    spell = Spell(**details)
-    LOGGER.info(str(spell))
 
     # Cleaning up field names for a pretty print
     formatted_details = {field.replace("_", " ").capitalize(): details[field] for field in details}
-    LOGGER.info(formatted_details)
-    msg = []
-    # Populating embedded message with all returned fields
-    for field in formatted_details:
-        # Setting base value for empty fields
-        if not formatted_details[field]:
-            formatted_details[field] = "None"
-        LOGGER.info("field --- %s", field)
-        LOGGER.info("value --- %s", formatted_details[field])
-        formatted_details[field] = str(formatted_details[field]).strip('\n')
-        msg.append(f"**{field}**\n{formatted_details[field]}")
-    msg.append("...anything look weird here? Let me know!")
-    msg = '\n'.join(msg)
-    return msg
+    spell = Spell(**formatted_details)
+    return str(spell)
 
 
 def get_monster_details(monster: str) -> dict:
