@@ -12,7 +12,7 @@ import json
 import urllib3
 from dotenv import load_dotenv
 
-from responses.spell import Spell
+from classes import Spell
 
 # Creating access to environment variables
 load_dotenv()

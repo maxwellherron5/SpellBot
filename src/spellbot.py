@@ -39,11 +39,13 @@ async def on_ready():
     """
     LOGGER.info("%s has connected to the server", bot.user.name)
 
+
 @bot.command(name="goodbot", help="Tell this bot how good they are")
 async def on_message(ctx):
     """
     """
     await ctx.channel.send(u"thank you \U0001f604")
+
 
 @bot.command(name="spell", help="Enter the name of your spell and I'll tell you about it! For now, please format as <spell-name>")
 async def on_spell_message(ctx, spell: str):

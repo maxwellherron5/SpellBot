@@ -1,4 +1,6 @@
 """
+Author: Maxwell Herron
+Python Version: 3.8.6
 """
 
 import logging
@@ -13,15 +15,15 @@ class Spell:
         self.__dict__.update(kwargs)
     
     def __repr__(self):
-        msg = []
+        msg = ""
         # Populating embedded message with all returned fields
         for field in self.__dict__:
             self.__dict__[field] = str(self.__dict__[field]).strip('\n')
-            msg.append(f"**{field}**\n{self.__dict__[field]}")
-        msg.append("\n...anything look weird here? Let me know!")
-        return "\n".join(msg)
-    
-    def build_output(self):
+            msg += f"**{field}**\n{self.__dict__[field]}\n"
+        msg += "...anything look weird here? Let me know!"
+        return msg
+
+    def build_output(self) -> list:
         msg = []
         for field in self.__dict__:
             self.__dict__[field] = str(self.__dict__[field]).strip('\n')
