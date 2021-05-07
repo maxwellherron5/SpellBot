@@ -8,9 +8,11 @@ Python Version: 3.8.6
 import os
 import logging
 import json
+import time
 
 import discord
 from discord.ext import commands
+from discord.ext.tasks import loop
 from dotenv import load_dotenv
 
 from api_utils import (
@@ -44,13 +46,16 @@ async def on_message(ctx):
     await ctx.channel.send(u"thank you \U0001f604")
 
 @bot.command(name="spell", help="Enter the name of your spell and I'll tell you about it! For now, please format as <spell-name>")
-async def on_message(ctx, spell: str):
+async def on_spell_message(ctx, spell: str):
     """
     """
     LOGGER.info("New message: %s", spell)
     try:
         spell_details = get_spell_details(spell)
-        await ctx.channel.send(spell_details)
+        LOGGER.info(f"INPUT: {spell_details}")
+        for section in spell_details:
+            LOGGER.info(f"Sending message: {section}")
+            await ctx.channel.send(section)
 
     except RequestExecutionError as exc:
         msg = exc.message

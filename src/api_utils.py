@@ -28,6 +28,22 @@ class RequestExecutionError(Exception):
         super().__init__(self.message)
 
 
+def make_request(section: str, value: str) -> dict:
+    """
+    """
+    http = urllib3.PoolManager()
+    endpoint = f"{DND_URL}/{section}/{value}/"
+    LOGGER.info("Request: %s", endpoint)
+    res = http.request('GET', endpoint)
+    details = json.loads(res.data.decode('utf-8'))
+    LOGGER.info("GET REQUEST RESPONSE CODE: %d", res.status)
+    if res.status != 200:
+        error = f"Oops, looks like the database doesn't have an entry for that {section[:-1]} :( not my fault ¯\_(ツ)_/¯"
+        LOGGER.error(error)
+        raise RequestExecutionError(error)
+    return details
+
+
 def get_spell_details(spell: str) -> dict:
     """Makes a request to Open5e to access all details on the given spell.
 
@@ -40,27 +56,19 @@ def get_spell_details(spell: str) -> dict:
     Raises:
         RequestExecutionError
     """
-    http = urllib3.PoolManager()
-    endpoint = f"{DND_URL}/spells/{spell}/"
-    LOGGER.info("Request: %s", endpoint)
-    res = http.request('GET', endpoint)
-    details = json.loads(res.data.decode('utf-8'))
-    LOGGER.info("GET REQUEST RESPONSE CODE: %d", res.status)
-    if res.status != 200:
-        error = f"Oops, looks like the database doesn't have an entry for that spell :( not my fault ¯\_(ツ)_/¯"
-        LOGGER.error(error)
-        raise RequestExecutionError(error)
+    # Executing API request
+    response = make_request(section="spells", value=spell)
 
-    # Trimming unneeded details from result
+    # Trimming unneeded details from response
     junk_keys = ["slug", "page", "document__slug", "document__title", "document__license_url"] + \
-        [field for field in details if not details[field]]
+        [field for field in response if not response[field]]
     for key in junk_keys:
-        details.pop(key)
+        response.pop(key)
 
     # Cleaning up field names for a pretty print
-    formatted_details = {field.replace("_", " ").capitalize(): details[field] for field in details}
+    formatted_details = {field.replace("_", " ").capitalize(): response[field] for field in response}
     spell = Spell(**formatted_details)
-    return str(spell)
+    return spell.build_output()
 
 
 def get_monster_details(monster: str) -> dict:
@@ -75,23 +83,15 @@ def get_monster_details(monster: str) -> dict:
     Raises:
         RequestExecutionError
     """
-    http = urllib3.PoolManager()
-    endpoint = f"{DND_URL}/monsters/{monster}/"
-    LOGGER.info("Request: %s", endpoint)
-    res = http.request('GET', endpoint)
-    details = json.loads(res.data.decode('utf-8'))
-    LOGGER.info("GET REQUEST RESPONSE CODE: %d", res.status)
-    if res.status != 200:
-        error = f"Oops, looks like the database doesn't have an entry for that monster :( not my fault ¯\_(ツ)_/¯"
-        LOGGER.error(error)
-        raise RequestExecutionError(error)
+    # Executing API request
+    response = make_request(section="monsters", value=monster)
 
-    # Trimming unneeded details from result
+    # Trimming unneeded details from response
     junk_keys = ["img_main", "document__slug", "document__title", "document__license_url"]
-    [details.pop(key) for key in junk_keys]
+    [response.pop(key) for key in junk_keys]
 
     # Cleaning up field names for a pretty print
-    formatted_details = {field.replace("_", " ").capitalize(): details[field] for field in details}
+    formatted_details = {field.replace("_", " ").capitalize(): response[field] for field in response}
 
     # Normalizing list or dictionary attributes into strings
     normalized_details = {}
